@@ -1,0 +1,28 @@
+# Pipeline steps list
+stages:
+  - test
+  - build
+  - deploy
+
+# Lint and unit tests
+lint-test:
+  stage: test
+  image:
+    name: node:11.10.1
+  script:
+    - npm install
+    - npm run test
+
+# Build step
+build-push:
+  stage: build
+  image:
+    name: docker:stable
+  services:
+  - docker:stable-dind
+  script:
+    - docker build --build-arg NPM_TOKEN=$NPM_RO_TOKEN -t $REPO_NAME .
+    - docker tag $REPO_NAME $REPO_REGISTRY_URL:$TAG
+    - docker push $REPO_REGISTRY_URL:$TAG
+    - docker rmi $REPO_NAME $REPO_REGISTRY_URL:$TAG
+view raw
